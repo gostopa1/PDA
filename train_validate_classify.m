@@ -10,6 +10,7 @@ nonotes=60;
 prefix='training_data/';
 
 dir(prefix)
+display(['Trying to load file: ' prefix 'training_detuned_distorted_drums_data_buffersize_' num2str(buffersize) '_basefreq' num2str(basefreq) '_samples' num2str(samples) '_harmonics' num2str(noharms) '_nonotes' num2str(nonotes) '.mat'])
 try
 load([prefix 'training_detuned_distorted_drums_data_buffersize_' num2str(buffersize) '_basefreq' num2str(basefreq) '_samples' num2str(samples) '_harmonics' num2str(noharms) '_nonotes' num2str(nonotes) '.mat'])
 catch me

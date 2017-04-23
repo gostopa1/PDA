@@ -1,15 +1,16 @@
 addpath('./src')
-bufferind=12;
+bufferind=11;
 buffersize=2^bufferind;
-basefreq=110;
+basefreq=55;
 samples=1000;
-noharms=5;
-nonotes=36;
+noharms=10;
+nonotes=60;
 
 
 prefix='training_data/';
 
 dir(prefix)
+T[prefix 'training_detuned_distorted_drums_data_buffersize_' num2str(buffersize) '_basefreq' num2str(basefreq) '_samples' num2str(samples) '_harmonics' num2str(noharms) '_nonotes' num2str(nonotes) '.mat']
 try
 load([prefix 'training_detuned_distorted_drums_data_buffersize_' num2str(buffersize) '_basefreq' num2str(basefreq) '_samples' num2str(samples) '_harmonics' num2str(noharms) '_nonotes' num2str(nonotes) '.mat'])
 catch me
@@ -23,7 +24,7 @@ addpath(genpath('../lrp-toolbox'));
 X_train=data_notecors;
 Y_train=binarylabels;
 s=size(X_train);
-nodevec=[nonotes*noharms nonotes];
+nodevec=[nonotes nonotes];
 noinputs=size(X_train,2);
 nooutputs=size(Y_train,2);
 
@@ -44,7 +45,7 @@ data_notecors=data_notecors./repmat(trend,nonotes*samples,1);
 X_test=data_notecors;
 Y_test=binarylabels;
 %X_test=X_test/max(X_test(:));
-nn.train(X_train,Y_train,X_test,Y_test,10,10000,0.01);
+nn.train(X_train,Y_train,X_test,Y_test,50,10000,0.01);
 %nn.train(X_train,Y_train,[],[],20);
 
 %%
@@ -58,10 +59,10 @@ coses=cos(2*pi*t'*notecorsfreqs');
 
 res=dir('sounds\*.wav');
 resi=2;
-filei=9;
-[y,fs]=wavread(['sounds\' res(filei).name]);
+resi=9;
+[y,fs]=wavread(['sounds\' res(resi).name]);
 %soundsc(y,fs)
-%
+%%
 res(resi).name
 y=y(:,1);
 y=y(1:(end));
@@ -79,59 +80,11 @@ for yi=1:floor((buffersize/gap)):(length(y)-buffersize)
     %validate_fftabs(ind,:)=abs(fft(buffer));
     
     
-    test_notecors(ind,:)=((sqrt([(buffer'*sins).^2 + (buffer'*coses).^2]))/buffersize)./trend;
-    %test_notecors(ind,:)=sqrt(abs(sum(repmat(window.*buffer,1,nonotes*noharms)'.*exp(-2*pi*i*notecorsfreqs*t),2)).^2)/buffersize;
+    %test_notecors(ind,:)=((sqrt([(buffer'*sins).^2 + (buffer'*coses).^2]))/buffersize)./trend;
+    test_notecors(ind,:)=sqrt(abs(sum(repmat(window.*buffer,1,nonotes*noharms)'.*exp(-2*pi*i*notecorsfreqs*t),2)).^2)/buffersize;
 end
 
 ypred = nn.forward(test_notecors);
-%%
-noteindsfirst=[3  7  12 ];
-
-noteinds=[];
-for octi=0:5
-    noteinds=[noteinds noteindsfirst+(12*octi)]
-end
-
-labs=getNoteNames(basefreq,nonotes)
-descending=nonotes:-1:1
-labs=getNoteNames(basefreq,max(noteinds))
-descending(noteinds(find(noteinds<nonotes)))
-f=figure(2)
-    imagesc(flipud(ypred'))
-    colorbar
-    
-    title(['Buffer Size - ' num2str(buffersize)])
-    
-        xlabel('Time (seconds)')
-    
-    secondgap=1;
-    seconds=0:secondgap:floor(length(y)/fs);
-    
-    ticks=(seconds)*(fs/(buffersize/gap));
-    set(gca,'Xtick',ticks)
-    set(gca,'XTickLabel',seconds)
-    
-    
-    %noteind=nonotes-[noteind noteind+12]
-    set(gca,'Ytick',sort(descending(noteinds(find(noteinds<nonotes)))))
-    %set(gca,'YtickLabel',labs(descending(noteinds(find(noteinds<nonotes)))))
-    set(gca,'YtickLabel',labs(sort(noteinds(find(noteinds<nonotes)),'descend')),'fontsize',7)
-    
-    set(gca,'Ytick',sort(descending(noteinds(find(noteinds<nonotes)))))
-    %set(gca,'YtickLabel',labs(descending(noteinds(find(noteinds<nonotes)))))
-    set(gca,'YtickLabel',labs(sort(noteinds(find(noteinds<nonotes)),'descend')),'fontsize',7)
-
-axis tight
-%set(f,'units','pixels','Position',[0 0 300 1000])
-set(f,'PaperPosition',[0 0 3 1.5])
-%set(f,'PaperPositionMode','auto')
-%set(f,'units','pixels','PaperPosition',[0 0 1000 200])
-%set(gca,'XColor','none','YColor','none')
-%print(f,'-dpdf','./ready_figures/zerocross_real.pdf')
-print(f,'-dpng','-r300',['./ready_figures/neural_nets_' res(filei).name(4:(end-4)) '_real.png'])
-
-%%
-
 
 a=zeros(size(ypred,1),1);
 %lengthof_avg=gap;

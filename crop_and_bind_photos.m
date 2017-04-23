@@ -1,3 +1,5 @@
+%% This script only loads images from the results and binds them together. It looks more neat than generating them directly in MATLAB because subplot management in MATLAB is a mess
+
 prefix='ready_figures\'
 
 res=dir([prefix '*.png'])

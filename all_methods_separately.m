@@ -1,34 +1,23 @@
-addpath('./src')
 clear
-res=dir('sounds\*.wav');
-res.name
+res=dir('sounds\*.wav'); % Find the sounds located in the sounds directory
+res.name %
 
-filei=8;
-filei=9;
-[y,fs]=wavread(['sounds\' res(filei).name]);
-y=y(:,1);
+filei=8; % Take the eighth sound
+[y,fs]=wavread(['sounds\' res(filei).name]); % Load the sound as vector 
+y=y(:,1); % Take only once channel of the audio in case of stereo
 %% Show spectrograms
-% 
-% 
-figure(filei+10)
-res(filei).name
-subplot(2,1,1)
-spectrogram(y,2048,256,1:0.1:1000,fs,'yaxis')
-subplot(2,1,2)
-plot(y)
-%%
 
-y=y(1:(end));
-basefreq=55;
-nonotes=60;
-noharms=5;
-gap=2;
-%sound(y,fs)
-y=y/max(y);
-addpath functions
-addpath data_from_Libraries
-buffersize=2^9;
-noteindsfirst=[3  7  12 ];
+y=y(1:(end)); % Take the whole sound (somnetimes it might be better to take smaller parts of the sound)
+basefreq=55; % Examine pitches starting from 55Hz A1
+nonotes=60; % How many notes to examine
+noharms=5; % How many harmonics to consider (for algorithms that take harmonics into account)
+gap=2; 
+
+y=y/max(y); % Normalize the signal to be in the range of [-1,+1]
+
+addpath functions % Add the functions folder to use functions implemented there
+buffersize=2^9; % Choose the buffer size
+noteindsfirst=[3  7  12 ]; % Choose which notes to show in the labels of the figures (Now it is C G A)
 noteinds=[];
 for octi=0:5
     noteinds=[noteinds noteindsfirst+(12*octi)]

@@ -15,14 +15,14 @@ labs={'A' 'A#' 'B' 'C' 'C#' 'D' 'D#' 'E' 'F' 'F#' 'G' 'G#' };
 alllabs=repmat(labs,1,60); % repeat the notes for a large number of times (number 60 is arbitrary)
 
 
-octind=log2(basefreq/A0freq)-1;
-for notei=2:(nonotes+1)
+octind=log2(basefreq/A0freq)-1; % Find the octave index based on the lowest frequency
+for notei=2:(nonotes+1) % For all the notes 
 
-    if strcmp(alllabs{notei},'C')
+    if strcmp(alllabs{notei},'C') % When you find a C ...
         
-        octind=octind+1;
+        octind=octind+1; % ... increase the octave index
     end
-    noteNames{notei-1}=strcat(alllabs{notei},num2str(octind));
+    noteNames{notei-1}=strcat(alllabs{notei},num2str(octind)); % Add the new note name with the proper octave index
 end
 
 end
