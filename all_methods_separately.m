@@ -18,27 +18,21 @@ y=y/max(y); % Normalize the signal to be in the range of [-1,+1]
 addpath functions % Add the functions folder to use functions implemented there
 buffersize=2^9; % Choose the buffer size
 noteindsfirst=[3  7  12 ]; % Choose which notes to show in the labels of the figures (Now it is C G A)
-noteinds=[];
-for octi=0:5
-    noteinds=[noteinds noteindsfirst+(12*octi)]
+noteinds=[]; % Make an empty vector where the note indices will be later stored
+for octi=0:5 % For each of the five octaves
+    noteinds=[noteinds noteindsfirst+(12*octi)]; % Make the note indices to use them later to get the note names
 end
 %% Preprocess sound
-%y=abs(y);
+ y=abs(y); % Take only the absolute part of the signal (no negative values)
+windof=hann(buffersize); % Generate a hanning window with size equal to the buffer size
+%windof=ones(buffersize,1); % Take a rectangular window (Use either this or hanning)
+cutoff_frequency=20; % In case of band pass filter, this is the low cutoff frequency
+cutoff_frequency2=4000; % In case of band pass filter this is the high cutoff frequency
+order = 4; %order filter, high pass % This is the order of the butterworth filter
+[b14 a14]=butter(order,[(cutoff_frequency/(fs/2)) (cutoff_frequency2/(fs/2))]); % Create the butterworth filter
+%y=filtfilt(b14,a14,y); % Apply the filter to the signal
 
-windof=hann(buffersize);
-%windof=ones(buffersize,1);
-cutoff_frequency=20;
-% cutoff_frequency=basefreq;
-cutoff_frequency2=4000;
-% cutoff_frequency2=basefreq*2^(nonotes/12)*noharms;
-order = 4; %order filter, high pass
-%[b14 a14]=butter(order,(cutoff_frequency/(fs/2)),'high');
-
-[b14 a14]=butter(order,[(cutoff_frequency/(fs/2)) (cutoff_frequency2/(fs/2))]);
-
-%y=filtfilt(b14,a14,y);
-
-%% Zero crossing
+%% Apply each method separately
 
 labs=getNoteNames(basefreq,nonotes)
 descending=nonotes:-1:1
@@ -47,18 +41,14 @@ descending(noteinds(find(noteinds<nonotes)))
 f=figure(filei)
 clf
 nobufs=4
-method='zc'
-method='autocore'
-%method='mautocore'
-%method='sine'
-%method='hsine'
-%for meo={'zc','autocore','mautocore','sine','hsine'}
-for meo={'autocore'}
-    method=meo{1}
-for bufferind=1:nobufs
+
+for meo={'zc','autocore','mautocore','sine','hsine'} % For all possible methods
+
+    method=meo{1} % Store the name of the method
+for bufferind=1:nobufs % For the different number of buffers
 %for bufferind=nobufs
     bufferind
-    clear data
+    clear data % Clear data in case it exists to avoid any conflicts
     ind=0;
     buffersize=2^(6+2*bufferind);
     windof=hann(buffersize);
@@ -87,11 +77,6 @@ for bufferind=1:nobufs
             otherwise
         end
         
-        
-        %data(ind,:)=multiple_autocorrelation_detection(buffer,basefreq,nonotes,fs);
-        %data(ind,:)=autocorrelation_detection(buffer,basefreq,nonotes,fs);
-        %data(ind,:)=harmonic_sine_detection(buffer,basefreq,nonotes,fs,noharms);
-        %data(ind,:)=simple_sine_detection(buffer,basefreq,nonotes,fs);
         time(ind)=yi/fs;
     end
     subplot(nobufs,1,bufferind)
